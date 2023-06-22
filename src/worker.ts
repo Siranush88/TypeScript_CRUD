@@ -2,10 +2,10 @@ import { parentPort } from 'worker_threads';
 import fs from 'fs';
 import csv from 'csv-parser';
 import { writeFile } from 'fs/promises';
-import { JSONData } from './modules/types.js';
+import { JSONData } from './interfaces/types.js';
 
 
-function parseCSV(filePath:string) {
+function parseCSV(filePath:string):void {
 
     const startTime = new Date();
     let count = 0;
@@ -16,11 +16,11 @@ function parseCSV(filePath:string) {
     const results:JSONData[] = [];
     fs.createReadStream(filePath)
         .pipe(csv())
-        .on('data', (data:JSONData) => {
+        .on('data', (data:JSONData):void => {
             count++;
             results.push(data);
         })
-        .on('end', () => {
+        .on('end', ():void => {
             const endTime = new Date();
             const duration = endTime.valueOf() - startTime.valueOf();
             writeFile(`./converted/${fileName}`, JSON.stringify(results, undefined, 2), 'utf-8')
@@ -28,8 +28,8 @@ function parseCSV(filePath:string) {
         })
 }
 
-parentPort.on('message', message => {
+parentPort.on('message', (message:string):void => {
     let filePath = message;
-    let result = parseCSV(filePath);
+    parseCSV(filePath);
 })
 

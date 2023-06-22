@@ -2,11 +2,12 @@ import { readdir, readFile, unlink } from 'fs/promises';
 import CsvToJson from './index.js';
 import http from 'http';
 import path from 'path';
+import { Request, Response } from './interfaces/types.js';
 
 const PORT = 3000;
 
 const server = http.createServer();
-server.on('request', async (req, res) => {
+server.on('request', async (req:Request, res:Response) => {
     let items:string[] = [];  
     if(typeof req.url === 'string') {
          items = req.url.split('/');
@@ -15,14 +16,19 @@ server.on('request', async (req, res) => {
     if (req.method === 'POST' && items[1] === 'exports') {
         try {
             await CsvToJson(items[2]);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+           // res.writeHead(200, { 'Content-Type': 'application/json' })
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
         } catch (err) {
             console.error('Error converting CSV files:', err);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
+           // res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.statusCode = 500;
+            res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ error: 'Failed to convert CSV files.' }));
         }
     } else if (req.method === 'GET' && items[1] === 'files') {
+       // res.writeHead(200, { 'Content-Type': 'application/json' })
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
 

@@ -1,28 +1,19 @@
 import path from 'path';
 import { Worker } from 'worker_threads';
-import { readdir } from 'fs/promises'
-
+import { readdir } from 'fs/promises';
+import {Message} from './interfaces/types.js';
 
 export default async function CsvToJson(directoryPath:string):Promise<void> {
 
 const csvFilesArray = await readdir(directoryPath);
 
-let numThreads = 0;
-let x = 0;
-
-if (csvFilesArray.length <= 10) {
-  numThreads = csvFilesArray.length;
-} else {
-  numThreads = 10;
-}
+const numThreads = csvFilesArray.length <= 10 ? csvFilesArray.length : 10
 
 const filesPerThread:number = Math.ceil(csvFilesArray.length / numThreads);
 
 for (let i = 0; i < numThreads; i++) {
   const worker = new Worker('./build/worker.js');
-  ++x;
-
-  worker.on('online', () => {
+  worker.on('online', ():void => {
     const start = i * filesPerThread;
     const end = (i + 1) * filesPerThread;
     
@@ -32,7 +23,7 @@ for (let i = 0; i < numThreads; i++) {
     }
   });
 
-  worker.on('message', (message) => {
+  worker.on('message', (message:Message):void => {
     const { count, duration } = message;
     console.log(`Parsing ${ csvFilesArray[i]} took ${duration} milliseconds to read ${count} lines`);
   });
