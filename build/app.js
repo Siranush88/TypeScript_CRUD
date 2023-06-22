@@ -21,21 +21,18 @@ server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* (
     if (req.method === 'POST' && items[1] === 'exports') {
         try {
             yield CsvToJson(items[2]);
-            // res.writeHead(200, { 'Content-Type': 'application/json' })
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
         }
         catch (err) {
             console.error('Error converting CSV files:', err);
-            // res.writeHead(500, { 'Content-Type': 'application/json' });
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ error: 'Failed to convert CSV files.' }));
         }
     }
     else if (req.method === 'GET' && items[1] === 'files') {
-        // res.writeHead(200, { 'Content-Type': 'application/json' })
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         if (typeof req.url === 'string') {

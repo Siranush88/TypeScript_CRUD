@@ -23,6 +23,5 @@ function parseCSV(filePath) {
 }
 parentPort.on('message', (message) => {
     let filePath = message;
-    // let result = parseCSV(filePath);
     parseCSV(filePath);
 });

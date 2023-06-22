@@ -6,7 +6,7 @@ export interface Message {
   }
 
 export interface Request {
-    url: any,
+    url: string,
     method: string
 }
 
