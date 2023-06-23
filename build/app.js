@@ -8,9 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { readdir, readFile, unlink } from 'fs/promises';
-import CsvToJson from './index.js';
+import CsvToJson from './main.js';
 import http from 'http';
 import path from 'path';
+//import { ResponseObject } from './interfaces/types.js';
 const PORT = 3000;
 const server = http.createServer();
 server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -23,6 +24,10 @@ server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* (
             yield CsvToJson(items[2]);
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
+            // const response: ResponseObject = {
+            //     message: 'CSV files are converted and saved.'
+            //   };
+            //   res.end(JSON.stringify(response));  
             res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
         }
         catch (err) {
@@ -75,3 +80,5 @@ server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* (
 server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
+// npm run build
+// npm start

@@ -1,5 +1,5 @@
 import { readdir, readFile, unlink } from 'fs/promises';
-import CsvToJson from './index.js';
+import CsvToJson from './main.js';
 import http from 'http';
 import path from 'path';
 import { Request, Response } from './interfaces/types.js';
@@ -17,7 +17,7 @@ server.on('request', async (req:Request, res:Response) => {
         try {
             await CsvToJson(items[2]);
             res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Content-Type', 'application/json'); 
             res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
         } catch (err) {
             console.error('Error converting CSV files:', err);
@@ -68,5 +68,5 @@ server.listen(PORT, () => {
 })
 
 
-
-
+// npm run build
+// npm start

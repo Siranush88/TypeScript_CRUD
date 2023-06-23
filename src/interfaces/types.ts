@@ -1,5 +1,4 @@
 export type JSONData = Record<string, any>;
-
 export interface Message {
     count: number,
     duration: number
@@ -10,8 +9,9 @@ export interface Request {
     method: string
 }
 
+type setHeader = (a:string, b:string) => string
 export interface Response {
   statusCode:number,
-  setHeader:any,
+  setHeader:setHeader,
   end:any
 }
