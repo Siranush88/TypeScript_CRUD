@@ -9,9 +9,10 @@ export interface Request {
     method: string
 }
 
-type setHeader = (a:string, b:string) => string
+type SetHeader = (a:string, b:string) => string;
+type End = (a:string) => string
 export interface Response {
   statusCode:number,
-  setHeader:setHeader,
-  end:any
+  setHeader:SetHeader,
+  end:End
 }

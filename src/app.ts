@@ -18,7 +18,7 @@ server.on('request', async (req:Request, res:Response) => {
             await CsvToJson(items[2]);
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json'); 
-            res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
+            res.end('CSV files are converted and saved.');
         } catch (err) {
             console.error('Error converting CSV files:', err);
             res.statusCode = 500;
