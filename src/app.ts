@@ -1,14 +1,32 @@
 import { readdir, readFile, unlink } from 'fs/promises';
 import CsvToJson from './main.js';
-import http from 'http';
+import http, {IncomingMessage, ServerResponse} from 'http';
 import path from 'path';
-import { Request, Response } from './interfaces/types.js';
+import { MessageData, ErrorData } from './interfaces/types.js';
+
+function sendResponse(res:ServerResponse, status:number, data?: MessageData | ErrorData | string, headers?: string[]):void {
+    res.statusCode = status;
+  
+    if (headers) {
+      for (const [key, value] of Object.entries(headers)) {
+        res.setHeader(key, value);
+      }
+    }
+    if (typeof data === 'object') {
+      data = JSON.stringify(data);
+    }
+  
+    res.end(data);
+  }
 
 const PORT = 3000;
 
-const server = http.createServer();
-server.on('request', async (req:Request, res:Response) => {
+const server = http.createServer( async (req:IncomingMessage , res:ServerResponse) => {
+
     let items:string[] = [];  
+
+    const headers = ['Content-Type', 'application/json'];
+
     if(typeof req.url === 'string') {
          items = req.url.split('/');
     }
@@ -16,19 +34,21 @@ server.on('request', async (req:Request, res:Response) => {
     if (req.method === 'POST' && items[1] === 'exports') {
         try {
             await CsvToJson(items[2]);
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json'); 
-            res.end('CSV files are converted and saved.');
+
+            const data = { message: 'CSV files are converted and saved.' };
+            sendResponse(res, 200, data, headers);
+
         } catch (err) {
             console.error('Error converting CSV files:', err);
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Failed to convert CSV files.' }));
+
+            const data = { error: 'Failed to convert CSV files.' };
+            sendResponse(res, 500, data, headers);
         }
     } else if (req.method === 'GET' && items[1] === 'files') {
+    
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
-
+     
         if (typeof req.url === 'string') {
             if (items.length === 3 && req.url.startsWith('/files/')) {
                 const filename = items[2];
@@ -36,12 +56,10 @@ server.on('request', async (req:Request, res:Response) => {
                 try {
                     const data = await readFile(filePath, 'utf-8');
                     const jsonData = JSON.parse(data);
-
-                    res.statusCode = 200;
-                    res.end(JSON.stringify(jsonData));
+                    sendResponse(res, 200, jsonData);
                 } catch (err) {
-                    res.statusCode = 404;
-                    res.end(JSON.stringify({ error: 'File not found.' }));
+                    const data = { error: 'File not found.' }
+                    sendResponse(res, 404, data);
                 }
             } else {
                 const jsonFileArray = await readdir('./converted')
@@ -58,8 +76,8 @@ server.on('request', async (req:Request, res:Response) => {
             console.error(`Error deleting file "${filename}":`, err);
         }
     } else {
-        res.statusCode = 404;
-        res.end(JSON.stringify({ error: 'Route not found.' }));
+        const data = { error: 'Route not found.' };
+        sendResponse(res, 404, data);
     }
 });
 

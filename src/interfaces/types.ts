@@ -3,16 +3,10 @@ export interface Message {
     count: number,
     duration: number
   }
-
-export interface Request {
-    url: string,
-    method: string
+export type MessageData = {
+  message: string
 }
+export type ErrorData = {
+  error: string
+} 
 
-type SetHeader = (a:string, b:string) => string;
-type End = (a:string) => string
-export interface Response {
-  statusCode:number,
-  setHeader:SetHeader,
-  end:End
-}

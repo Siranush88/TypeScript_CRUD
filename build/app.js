@@ -11,25 +11,35 @@ import { readdir, readFile, unlink } from 'fs/promises';
 import CsvToJson from './main.js';
 import http from 'http';
 import path from 'path';
+function sendResponse(res, status, data, headers) {
+    res.statusCode = status;
+    if (headers) {
+        for (const [key, value] of Object.entries(headers)) {
+            res.setHeader(key, value);
+        }
+    }
+    if (typeof data === 'object') {
+        data = JSON.stringify(data);
+    }
+    res.end(data);
+}
 const PORT = 3000;
-const server = http.createServer();
-server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const server = http.createServer((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let items = [];
+    const headers = ['Content-Type', 'application/json'];
     if (typeof req.url === 'string') {
         items = req.url.split('/');
     }
     if (req.method === 'POST' && items[1] === 'exports') {
         try {
             yield CsvToJson(items[2]);
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ message: 'CSV files are converted and saved.' }));
+            const data = { message: 'CSV files are converted and saved.' };
+            sendResponse(res, 200, data, headers);
         }
         catch (err) {
             console.error('Error converting CSV files:', err);
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Failed to convert CSV files.' }));
+            const data = { error: 'Failed to convert CSV files.' };
+            sendResponse(res, 500, data, headers);
         }
     }
     else if (req.method === 'GET' && items[1] === 'files') {
@@ -42,12 +52,11 @@ server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 try {
                     const data = yield readFile(filePath, 'utf-8');
                     const jsonData = JSON.parse(data);
-                    res.statusCode = 200;
-                    res.end(JSON.stringify(jsonData));
+                    sendResponse(res, 200, jsonData);
                 }
                 catch (err) {
-                    res.statusCode = 404;
-                    res.end(JSON.stringify({ error: 'File not found.' }));
+                    const data = { error: 'File not found.' };
+                    sendResponse(res, 404, data);
                 }
             }
             else {
@@ -68,8 +77,8 @@ server.on('request', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         }
     }
     else {
-        res.statusCode = 404;
-        res.end(JSON.stringify({ error: 'Route not found.' }));
+        const data = { error: 'Route not found.' };
+        sendResponse(res, 404, data);
     }
 }));
 server.listen(PORT, () => {
